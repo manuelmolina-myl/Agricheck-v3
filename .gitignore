@@ -1,0 +1,54 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Production builds
+dist/
+build/
+.svelte-kit/
+.vercel/
+.netlify/
+
+# Environment variables (NUNCA COMMITEAR)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Credentials (CRITICO - NUNCA COMMITEAR)
+google-credentials.json
+*.pem
+*.key
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary
+*.tmp
+.cache/
+
+# Turborepo
+.turbo/
+
+# Supabase
+.supabase/
