@@ -1,0 +1,340 @@
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+
+export interface Database {
+	public: {
+		Tables: {
+			admins: {
+				Row: {
+					id: string;
+					email: string;
+					full_name: string;
+					role: string;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					email: string;
+					full_name: string;
+					role?: string;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					email?: string;
+					full_name?: string;
+					role?: string;
+					created_at?: string;
+				};
+			};
+			tenants: {
+				Row: {
+					id: string;
+					company_name: string;
+					slug: string;
+					owner_name: string;
+					owner_email: string;
+					owner_phone: string | null;
+					plan: string;
+					status: string;
+					trial_ends_at: string;
+					stripe_customer_id: string | null;
+					stripe_subscription_id: string | null;
+					max_workers: number;
+					max_ranches: number;
+					features: Json;
+					settings: Json;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					company_name: string;
+					slug: string;
+					owner_name: string;
+					owner_email: string;
+					owner_phone?: string | null;
+					plan?: string;
+					status?: string;
+					trial_ends_at?: string;
+					stripe_customer_id?: string | null;
+					stripe_subscription_id?: string | null;
+					max_workers?: number;
+					max_ranches?: number;
+					features?: Json;
+					settings?: Json;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: {
+					id?: string;
+					company_name?: string;
+					slug?: string;
+					owner_name?: string;
+					owner_email?: string;
+					owner_phone?: string | null;
+					plan?: string;
+					status?: string;
+					trial_ends_at?: string;
+					stripe_customer_id?: string | null;
+					stripe_subscription_id?: string | null;
+					max_workers?: number;
+					max_ranches?: number;
+					features?: Json;
+					settings?: Json;
+					created_at?: string;
+					updated_at?: string;
+				};
+			};
+			tenant_users: {
+				Row: {
+					id: string;
+					tenant_id: string;
+					email: string;
+					full_name: string;
+					role: string;
+					auth_user_id: string | null;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					tenant_id: string;
+					email: string;
+					full_name: string;
+					role?: string;
+					auth_user_id?: string | null;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					tenant_id?: string;
+					email?: string;
+					full_name?: string;
+					role?: string;
+					auth_user_id?: string | null;
+					created_at?: string;
+				};
+			};
+			ranches: {
+				Row: {
+					id: string;
+					tenant_id: string;
+					name: string;
+					lot_number: string | null;
+					address: string | null;
+					geofence_lat: number;
+					geofence_lng: number;
+					geofence_radius_meters: number;
+					supervisor_name: string | null;
+					supervisor_phone: string | null;
+					active: boolean;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					tenant_id: string;
+					name: string;
+					lot_number?: string | null;
+					address?: string | null;
+					geofence_lat: number;
+					geofence_lng: number;
+					geofence_radius_meters?: number;
+					supervisor_name?: string | null;
+					supervisor_phone?: string | null;
+					active?: boolean;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: {
+					id?: string;
+					tenant_id?: string;
+					name?: string;
+					lot_number?: string | null;
+					address?: string | null;
+					geofence_lat?: number;
+					geofence_lng?: number;
+					geofence_radius_meters?: number;
+					supervisor_name?: string | null;
+					supervisor_phone?: string | null;
+					active?: boolean;
+					created_at?: string;
+					updated_at?: string;
+				};
+			};
+			workers: {
+				Row: {
+					id: string;
+					tenant_id: string;
+					ranch_id: string | null;
+					phone: string;
+					full_name: string;
+					employee_number: string | null;
+					registration_photo_url: string;
+					face_encoding: string | null;
+					registration_token: string | null;
+					registered_at: string | null;
+					last_checkin_at: string | null;
+					status: string;
+					created_at: string;
+					updated_at: string;
+				};
+				Insert: {
+					id?: string;
+					tenant_id: string;
+					ranch_id?: string | null;
+					phone: string;
+					full_name: string;
+					employee_number?: string | null;
+					registration_photo_url: string;
+					face_encoding?: string | null;
+					registration_token?: string | null;
+					registered_at?: string | null;
+					last_checkin_at?: string | null;
+					status?: string;
+					created_at?: string;
+					updated_at?: string;
+				};
+				Update: {
+					id?: string;
+					tenant_id?: string;
+					ranch_id?: string | null;
+					phone?: string;
+					full_name?: string;
+					employee_number?: string | null;
+					registration_photo_url?: string;
+					face_encoding?: string | null;
+					registration_token?: string | null;
+					registered_at?: string | null;
+					last_checkin_at?: string | null;
+					status?: string;
+					created_at?: string;
+					updated_at?: string;
+				};
+			};
+			attendances: {
+				Row: {
+					id: string;
+					tenant_id: string;
+					worker_id: string;
+					ranch_id: string;
+					date: string;
+					entry_time: string | null;
+					entry_photo_url: string | null;
+					entry_location_lat: number | null;
+					entry_location_lng: number | null;
+					entry_distance_meters: number | null;
+					entry_face_confidence: number | null;
+					entry_verified: boolean;
+					entry_notes: string | null;
+					exit_time: string | null;
+					exit_photo_url: string | null;
+					exit_location_lat: number | null;
+					exit_location_lng: number | null;
+					exit_distance_meters: number | null;
+					exit_face_confidence: number | null;
+					exit_verified: boolean;
+					exit_notes: string | null;
+					total_hours: number | null;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					tenant_id: string;
+					worker_id: string;
+					ranch_id: string;
+					date?: string;
+					entry_time?: string | null;
+					entry_photo_url?: string | null;
+					entry_location_lat?: number | null;
+					entry_location_lng?: number | null;
+					entry_distance_meters?: number | null;
+					entry_face_confidence?: number | null;
+					entry_verified?: boolean;
+					entry_notes?: string | null;
+					exit_time?: string | null;
+					exit_photo_url?: string | null;
+					exit_location_lat?: number | null;
+					exit_location_lng?: number | null;
+					exit_distance_meters?: number | null;
+					exit_face_confidence?: number | null;
+					exit_verified?: boolean;
+					exit_notes?: string | null;
+					total_hours?: number | null;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					tenant_id?: string;
+					worker_id?: string;
+					ranch_id?: string;
+					date?: string;
+					entry_time?: string | null;
+					entry_photo_url?: string | null;
+					entry_location_lat?: number | null;
+					entry_location_lng?: number | null;
+					entry_distance_meters?: number | null;
+					entry_face_confidence?: number | null;
+					entry_verified?: boolean;
+					entry_notes?: string | null;
+					exit_time?: string | null;
+					exit_photo_url?: string | null;
+					exit_location_lat?: number | null;
+					exit_location_lng?: number | null;
+					exit_distance_meters?: number | null;
+					exit_face_confidence?: number | null;
+					exit_verified?: boolean;
+					exit_notes?: string | null;
+					total_hours?: number | null;
+					created_at?: string;
+				};
+			};
+			audit_logs: {
+				Row: {
+					id: string;
+					tenant_id: string | null;
+					user_id: string | null;
+					user_email: string | null;
+					user_role: string | null;
+					action: string;
+					resource_type: string | null;
+					resource_id: string | null;
+					metadata: Json;
+					ip_address: string | null;
+					user_agent: string | null;
+					created_at: string;
+				};
+				Insert: {
+					id?: string;
+					tenant_id?: string | null;
+					user_id?: string | null;
+					user_email?: string | null;
+					user_role?: string | null;
+					action: string;
+					resource_type?: string | null;
+					resource_id?: string | null;
+					metadata?: Json;
+					ip_address?: string | null;
+					user_agent?: string | null;
+					created_at?: string;
+				};
+				Update: {
+					id?: string;
+					tenant_id?: string | null;
+					user_id?: string | null;
+					user_email?: string | null;
+					user_role?: string | null;
+					action?: string;
+					resource_type?: string | null;
+					resource_id?: string | null;
+					metadata?: Json;
+					ip_address?: string | null;
+					user_agent?: string | null;
+					created_at?: string;
+				};
+			};
+		};
+		Views: Record<string, never>;
+		Functions: Record<string, never>;
+		Enums: Record<string, never>;
+	};
+}

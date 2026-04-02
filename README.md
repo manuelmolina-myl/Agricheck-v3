@@ -14,39 +14,43 @@ Los productores agricolas en Mexico pierden **10-15% de su nomina** debido a:
 ## La Solucion
 
 AgriCheck elimina el fraude mediante:
-- **Verificacion facial biometrica** (Google Cloud Vision)
-- **Geofencing GPS** (el trabajador debe estar en el rancho)
-- **PWA movil** (cada trabajador hace su propio check-in)
-- **Dashboard en tiempo real** para productores
-- **Multi-tenant SaaS** con self-service signup
+- Verificacion facial biometrica (Google Cloud Vision)
+- Geofencing GPS (el trabajador debe estar en el rancho)
+- PWA movil (cada trabajador hace su propio check-in)
+- Dashboard en tiempo real para productores
+- Multi-tenant SaaS con self-service signup
 
 ## Stack Tecnologico
 
-| Componente | Tecnologia |
-|---|---|
-| Framework | SvelteKit (TypeScript) |
-| Monorepo | Turborepo |
-| Database | Supabase (PostgreSQL + RLS + Auth) |
-| Facial Recognition | Google Cloud Vision API |
-| Storage | Cloudflare R2 |
-| Payments | Stripe |
-| Deploy | Vercel |
-| Styling | TailwindCSS |
+- **Framework**: SvelteKit (TypeScript)
+- **Database**: Supabase (PostgreSQL + RLS + Auth)
+- **Facial Recognition**: Google Cloud Vision API
+- **Storage**: Cloudflare R2
+- **Payments**: Stripe
+- **Deploy**: Vercel
+- **Styling**: TailwindCSS
+- **PWA**: Vite PWA Plugin
 
-## Estructura del Monorepo
+## Estructura del Proyecto
 
 ```
-agricheck-v3/
-├── apps/
-│   ├── admin/          # Super Admin Dashboard (localhost:5173)
-│   ├── dashboard/      # Tenant Dashboard (localhost:5174)
-│   └── worker/         # PWA Worker App (localhost:5175)
-├── packages/
-│   ├── database/       # Supabase client + types
-│   ├── ui/             # Shared Svelte components
-│   └── lib/            # Business logic (facial, geofence, billing)
-└── supabase/
-    └── migrations/     # Database migrations
+agricheck/
+├── src/
+│   ├── routes/
+│   │   ├── (admin)/           # Super Admin Dashboard
+│   │   ├── (auth)/            # Login/Signup
+│   │   ├── (app)/             # Tenant Dashboard
+│   │   └── (worker)/          # Worker PWA
+│   ├── lib/
+│   │   ├── server/           # Server-only logic
+│   │   ├── components/       # Shared components
+│   │   └── types/           # TypeScript types
+│   └── app.html
+├── supabase/
+│   └── migrations/          # Database migrations
+├── static/
+│   └── manifest.json        # PWA manifest
+└── package.json
 ```
 
 ## Setup Rapido
@@ -54,7 +58,6 @@ agricheck-v3/
 ### Prerequisitos
 
 - Node.js 18+
-- npm
 - Cuenta Supabase
 - Cuenta Google Cloud (Vision API)
 - Cuenta Stripe
@@ -62,7 +65,7 @@ agricheck-v3/
 ### 1. Clonar repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/agricheck-v3.git
+git clone https://github.com/[tu-usuario]/agricheck-v3.git
 cd agricheck-v3
 ```
 
@@ -85,101 +88,80 @@ Variables requeridas:
 - `GOOGLE_APPLICATION_CREDENTIALS`
 - `STRIPE_SECRET_KEY`
 
-Ver `.env.example` para la lista completa.
-
 ### 4. Aplicar migrations a Supabase
 
-```bash
-# Opcion A: Supabase CLI
-supabase db push
+En Supabase Dashboard > SQL Editor, ejecutar `supabase/migrations/*.sql`
 
-# Opcion B: Dashboard SQL Editor
-# Ejecutar supabase/migrations/20240101000000_initial_schema.sql
-```
-
-### 5. Generar tipos TypeScript
-
-```bash
-npx supabase gen types typescript --project-id [tu-project-id] > packages/database/src/types.ts
-```
-
-### 6. Iniciar desarrollo
+### 5. Iniciar desarrollo
 
 ```bash
 npm run dev
 ```
 
-Las 3 apps estaran disponibles en:
-- **Admin**: http://localhost:5173
-- **Dashboard**: http://localhost:5174
-- **Worker PWA**: http://localhost:5175
+App disponible en: http://localhost:5173
 
 ## Scripts Disponibles
 
 ```bash
-npm run dev        # Inicia todas las apps en modo desarrollo
-npm run build      # Build de produccion de todas las apps
-npm run lint       # Lint de codigo
-npm run clean      # Limpia node_modules y builds
+npm run dev        # Desarrollo
+npm run build      # Build produccion
+npm run preview    # Preview build
+npm run check      # Type checking
+npm run lint       # Lint codigo
+npm run format     # Format codigo
 ```
 
-## Arquitectura
+## Arquitectura de Rutas
 
-### Admin App (Super Admin)
-- Dashboard global de todos los tenants
-- Analytics (MRR, churn, growth)
-- Gestion de clientes
-- Feature flags
-- Billing management
+### (admin) - Super Admin
+- `/admin` - Dashboard global
+- `/admin/tenants` - Gestion clientes
+- `/admin/analytics` - Analytics
+- `/admin/billing` - Billing
 
-### Dashboard App (Productor/Cliente)
-- Self-service signup con trial 30 dias
-- Dashboard de asistencias del dia
-- Gestion de trabajadores y ranchos
-- Reportes y analytics
-- Configuracion y billing
+### (auth) - Autenticacion
+- `/login` - Login
+- `/signup` - Registro self-service
+- `/onboarding` - Wizard onboarding
 
-### Worker App (Jornalero)
-- PWA instalable
-- Registro facial inicial
-- Check-in/out diario con selfie + GPS
-- Historial personal de asistencias
-- Offline-capable
+### (app) - Dashboard Productor
+- `/dashboard` - Vista principal
+- `/workers` - Gestion trabajadores
+- `/ranches` - Gestion ranchos
+- `/reports` - Reportes
+- `/settings` - Configuracion
+
+### (worker) - PWA Trabajador
+- `/register/[token]` - Registro facial
+- `/check` - Check-in/out diario
 
 ## Roadmap
 
 ### Fase 1 (Actual)
-- [x] Monorepo setup
-- [x] Database schema con RLS
+- [x] Setup proyecto
+- [x] Database schema
 - [x] Auth multi-tenant
-- [x] Facial recognition (Google Cloud Vision)
-- [x] Geofencing (Haversine)
-- [x] Stripe billing helpers
-- [x] Worker PWA check-in/out
-- [x] Self-service signup
-- [ ] Dashboard completo
+- [ ] Self-service signup
+- [ ] Worker check-in/out
+- [ ] Dashboard basico
 
 ### Fase 2
-- [ ] Stripe billing completo
+- [ ] Stripe billing
 - [ ] Reportes avanzados
 - [ ] Notificaciones push
-- [ ] Export a Excel/PDF
 - [ ] API publica
 
 ### Fase 3
 - [ ] App movil nativa
-- [ ] Analytics ML para deteccion de patrones
-- [ ] Integracion con ERPs
-- [ ] Multi-idioma
+- [ ] Analytics ML
+- [ ] Integracion ERPs
 
 ## Seguridad
 
-- Row Level Security (RLS) en todas las tablas
-- Credentials NUNCA en codigo (usar `.env`)
-- Google credentials en `.gitignore`
-- Stripe webhooks firmados
-- HTTPS obligatorio en produccion
-- Aislamiento multi-tenant por RLS policies
+- Row Level Security (RLS) en Supabase
+- Credentials en .env (nunca en codigo)
+- Google credentials en .gitignore
+- HTTPS en produccion
 
 ## Licencia
 
