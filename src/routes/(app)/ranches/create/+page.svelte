@@ -3,6 +3,11 @@
 	import Input from '$lib/components/Input.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import Alert from '$lib/components/Alert.svelte';
+	import MapPicker from '$lib/components/MapPicker.svelte';
+
+	let mapLat = 0;
+	let mapLng = 0;
+	let mapRadius = 500;
 
 	let name = '';
 	let lotNumber = '';
@@ -23,10 +28,32 @@
 				(pos) => {
 					geofenceLat = pos.coords.latitude.toFixed(8);
 					geofenceLng = pos.coords.longitude.toFixed(8);
+					mapLat = pos.coords.latitude;
+					mapLng = pos.coords.longitude;
 					gettingLocation = false;
 				},
 				() => { gettingLocation = false; error = 'No se pudo obtener la ubicacion.'; }
 			);
+		}
+	}
+
+	function handleMapLocationChange(e: CustomEvent<{ lat: number; lng: number }>) {
+		geofenceLat = e.detail.lat.toFixed(8);
+		geofenceLng = e.detail.lng.toFixed(8);
+		mapLat = e.detail.lat;
+		mapLng = e.detail.lng;
+	}
+
+	// Sync map radius with form input
+	$: mapRadius = parseInt(geofenceRadius) || 500;
+
+	// Sync map position when user types in lat/lng fields
+	$: if (geofenceLat && geofenceLng) {
+		const parsedLat = parseFloat(geofenceLat);
+		const parsedLng = parseFloat(geofenceLng);
+		if (!isNaN(parsedLat) && !isNaN(parsedLng) && parsedLat !== mapLat && parsedLng !== mapLng) {
+			mapLat = parsedLat;
+			mapLng = parsedLng;
 		}
 	}
 
@@ -105,11 +132,21 @@
 					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
 					Usar mi ubicacion actual
 				</Button>
+
+				<!-- Interactive Map -->
+				<MapPicker
+					bind:lat={mapLat}
+					bind:lng={mapLng}
+					radius={mapRadius}
+					height="350px"
+					on:locationChange={handleMapLocationChange}
+				/>
+
 				<div class="grid grid-cols-2 gap-4">
 					<Input label="Latitud" bind:value={geofenceLat} placeholder="20.12345678" required />
 					<Input label="Longitud" bind:value={geofenceLng} placeholder="-103.12345678" required />
 				</div>
-				<Input label="Radio (metros)" type="number" bind:value={geofenceRadius} placeholder="500" min="100" max="5000" helperText="Entre 100 y 5,000 metros" />
+				<Input label="Radio (metros)" type="number" bind:value={geofenceRadius} placeholder="500" min="100" max="5000" helperText="Entre 100 y 5,000 metros. El circulo azul en el mapa muestra el area." />
 			</div>
 		</Card>
 
