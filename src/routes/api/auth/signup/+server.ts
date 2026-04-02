@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js';
 const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-export const POST: RequestHandler = async ({ request }) => {
+export const POST: RequestHandler = async ({ request, cookies }) => {
 	if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
 		return json({ message: 'Server not configured. Set Supabase environment variables.' }, { status: 503 });
 	}
@@ -88,17 +88,30 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	if (signInError || !signInData.session) {
 		return json({
-			message: 'Cuenta creada. Por favor inicia sesión.',
+			message: 'Cuenta creada. Por favor inicia sesion.',
 			redirect: '/login'
 		});
 	}
 
+	// Set session cookies
+	cookies.set('sb-access-token', signInData.session.access_token, {
+		path: '/',
+		httpOnly: true,
+		sameSite: 'lax',
+		secure: true,
+		maxAge: 60 * 60 * 24 * 7
+	});
+
+	cookies.set('sb-refresh-token', signInData.session.refresh_token, {
+		path: '/',
+		httpOnly: true,
+		sameSite: 'lax',
+		secure: true,
+		maxAge: 60 * 60 * 24 * 30
+	});
+
 	return json({
 		message: 'Cuenta creada exitosamente.',
-		session: {
-			access_token: signInData.session.access_token,
-			refresh_token: signInData.session.refresh_token
-		},
 		tenantId: tenant.id
 	});
 };
