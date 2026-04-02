@@ -9,6 +9,10 @@
 	export let name = '';
 	export let min: string | undefined = undefined;
 	export let max: string | undefined = undefined;
+
+	function setType(node: HTMLInputElement) {
+		node.type = type;
+	}
 </script>
 
 <div>
@@ -19,7 +23,7 @@
 		</label>
 	{/if}
 	<input
-		{type}
+		use:setType
 		{name}
 		{placeholder}
 		{required}

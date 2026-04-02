@@ -2,57 +2,59 @@ import { createClient } from '@supabase/supabase-js';
 import { redirect, type Handle } from '@sveltejs/kit';
 import type { Database } from '$lib/types/database.types';
 
-export const handle: Handle = async ({ event, resolve }) => {
-	const supabase = createClient<Database>(
-		process.env.PUBLIC_SUPABASE_URL!,
-		process.env.PUBLIC_SUPABASE_ANON_KEY!,
-		{
-			auth: {
-				autoRefreshToken: false,
-				persistSession: false
-			}
-		}
-	);
+const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.PUBLIC_SUPABASE_ANON_KEY;
 
-	event.locals.supabase = supabase;
+export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.session = null;
 	event.locals.tenantId = null;
 	event.locals.userRole = null;
 
-	const accessToken = event.cookies.get('sb-access-token');
-	const refreshToken = event.cookies.get('sb-refresh-token');
-
-	if (accessToken && refreshToken) {
-		const {
-			data: { session }
-		} = await supabase.auth.setSession({
-			access_token: accessToken,
-			refresh_token: refreshToken
+	if (SUPABASE_URL && SUPABASE_ANON_KEY) {
+		const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+			auth: {
+				autoRefreshToken: false,
+				persistSession: false
+			}
 		});
 
-		if (session) {
-			event.locals.session = session;
+		event.locals.supabase = supabase;
 
-			// Check if admin
-			const { data: admin } = await supabase
-				.from('admins')
-				.select('id, role')
-				.eq('id', session.user.id)
-				.single();
+		const accessToken = event.cookies.get('sb-access-token');
+		const refreshToken = event.cookies.get('sb-refresh-token');
 
-			if (admin) {
-				event.locals.userRole = 'admin';
-			} else {
-				// Check tenant user
-				const { data: tenantUser } = await supabase
-					.from('tenant_users')
-					.select('tenant_id, role')
-					.eq('auth_user_id', session.user.id)
+		if (accessToken && refreshToken) {
+			const {
+				data: { session }
+			} = await supabase.auth.setSession({
+				access_token: accessToken,
+				refresh_token: refreshToken
+			});
+
+			if (session) {
+				event.locals.session = session;
+
+				// Check if admin
+				const { data: admin } = await supabase
+					.from('admins')
+					.select('id, role')
+					.eq('id', session.user.id)
 					.single();
 
-				if (tenantUser) {
-					event.locals.tenantId = tenantUser.tenant_id;
-					event.locals.userRole = tenantUser.role as App.Locals['userRole'];
+				if (admin) {
+					event.locals.userRole = 'admin';
+				} else {
+					// Check tenant user
+					const { data: tenantUser } = await supabase
+						.from('tenant_users')
+						.select('tenant_id, role')
+						.eq('auth_user_id', session.user.id)
+						.single();
+
+					if (tenantUser) {
+						event.locals.tenantId = tenantUser.tenant_id;
+						event.locals.userRole = tenantUser.role as App.Locals['userRole'];
+					}
 				}
 			}
 		}
