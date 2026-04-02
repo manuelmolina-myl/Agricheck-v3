@@ -96,8 +96,7 @@
 							<td class="px-5 py-3.5 text-surface-600">{worker.phone}</td>
 							<td class="px-5 py-3.5 text-surface-600">{worker.ranches?.name || '—'}</td>
 							<td class="px-5 py-3.5">
-								{@const badge = statusBadge(worker.status)}
-								<Badge variant={badge.variant} dot>{badge.label}</Badge>
+								<Badge variant={statusBadge(worker.status).variant} dot>{statusBadge(worker.status).label}</Badge>
 							</td>
 							<td class="px-5 py-3.5 text-surface-500 text-xs">{formatDate(worker.last_checkin_at)}</td>
 							<td class="px-5 py-3.5">

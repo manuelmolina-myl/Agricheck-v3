@@ -8,6 +8,7 @@
 	export let data;
 	$: worker = data.worker;
 	$: attendances = data.attendances || [];
+	$: thisMonthCount = attendances.filter((a: Record<string, string>) => new Date(a.date).getMonth() === new Date().getMonth()).length;
 
 	function statusBadge(status: string) {
 		switch (status) {
@@ -65,8 +66,7 @@
 		<div class="flex-1">
 			<div class="flex items-center gap-3 mb-1">
 				<h1 class="text-display-sm font-bold text-surface-900">{worker.full_name}</h1>
-				{@const badge = statusBadge(worker.status)}
-				<Badge variant={badge.variant} dot>{badge.label}</Badge>
+				<Badge variant={statusBadge(worker.status).variant} dot>{statusBadge(worker.status).label}</Badge>
 			</div>
 			<p class="text-surface-500">{worker.phone}</p>
 			{#if worker.employee_number}
@@ -130,7 +130,7 @@
 				<div class="flex justify-between">
 					<span class="text-sm text-surface-500">Este mes</span>
 					<span class="text-sm font-bold text-surface-900">
-						{attendances.filter((a: any) => new Date(a.date).getMonth() === new Date().getMonth()).length}
+						{thisMonthCount}
 					</span>
 				</div>
 			</div>
