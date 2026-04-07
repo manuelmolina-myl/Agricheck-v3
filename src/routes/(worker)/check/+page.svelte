@@ -23,6 +23,15 @@
 	let currentTime = '';
 
 	onMount(async () => {
+		// Check if worker is identified
+		const workerId = localStorage.getItem('agricheck_worker_id');
+		if (!workerId) {
+			window.location.href = '/check/login';
+			return;
+		}
+
+		workerName = localStorage.getItem('agricheck_worker_name') || '';
+
 		updateClock();
 		setInterval(updateClock, 1000);
 
@@ -32,6 +41,13 @@
 		await loadStatus();
 		state = 'ready';
 	});
+
+	function workerLogout() {
+		localStorage.removeItem('agricheck_worker_id');
+		localStorage.removeItem('agricheck_worker_name');
+		localStorage.removeItem('agricheck_worker_phone');
+		window.location.href = '/check/login';
+	}
 
 	function updateClock() {
 		currentTime = new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
@@ -154,10 +170,16 @@
 <div class="min-h-screen bg-gradient-to-b from-surface-50 to-surface-100 flex flex-col items-center px-4 py-8 safe-area-inset">
 	<div class="max-w-sm w-full flex flex-col items-center">
 		<!-- Header -->
-		<div class="mb-8 text-center animate-fade-in">
-			<Logo variant="icon" size="md" />
+		<div class="mb-8 text-center animate-fade-in w-full">
+			<div class="flex items-center justify-between w-full mb-4">
+				<Logo variant="icon" size="md" />
+				<button on:click={workerLogout} class="text-xs text-surface-400 hover:text-surface-600 transition-colors flex items-center gap-1">
+					<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+					Salir
+				</button>
+			</div>
 			{#if workerName}
-				<p class="text-surface-700 font-medium mt-3">Hola, {workerName}</p>
+				<p class="text-surface-700 font-medium">Hola, {workerName}</p>
 			{/if}
 			<p class="text-2xl font-bold text-surface-900 tabular-nums mt-1">{currentTime}</p>
 		</div>

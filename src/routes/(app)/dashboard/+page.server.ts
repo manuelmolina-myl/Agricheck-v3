@@ -1,7 +1,7 @@
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
-	if (!locals.supabase || !locals.tenantId) {
+	if (!locals?.supabase || !locals?.tenantId) {
 		return { stats: null, recentCheckins: [], tenant: null };
 	}
 
