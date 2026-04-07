@@ -14,5 +14,6 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw redirect(303, '/dashboard');
 	}
 
-	throw redirect(303, '/login');
+	// Show landing page for non-authenticated users
+	return {};
 };
