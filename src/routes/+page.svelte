@@ -135,13 +135,13 @@
 </section>
 
 <!-- Stats -->
-<section class="bg-white py-16 border-y border-surface-100">
+<section class="bg-primary-900 py-16">
 	<div class="max-w-5xl mx-auto px-6">
 		<div class="grid grid-cols-2 md:grid-cols-4 gap-8">
 			{#each stats as stat, i}
 				<div class="text-center scroll-animate" style="transition-delay:{i * 0.1}s">
-					<p class="text-3xl md:text-4xl font-bold text-gradient mb-2">{stat.value}</p>
-					<p class="text-sm text-surface-500">{stat.label}</p>
+					<p class="text-3xl md:text-4xl font-bold text-white mb-2">{stat.value}</p>
+					<p class="text-sm text-primary-200/60">{stat.label}</p>
 				</div>
 			{/each}
 		</div>
@@ -149,7 +149,7 @@
 </section>
 
 <!-- Features -->
-<section id="features" class="bg-surface-50 py-28">
+<section id="features" class="bg-white py-28">
 	<div class="max-w-6xl mx-auto px-6">
 		<div class="text-center mb-16 scroll-animate">
 			<p class="text-sm font-semibold text-primary-600 uppercase tracking-widest mb-3">Funciones</p>
@@ -172,7 +172,7 @@
 </section>
 
 <!-- How it works -->
-<section id="how" class="bg-white py-28 border-t border-surface-100 relative overflow-hidden">
+<section id="how" class="bg-surface-100/50 py-28 relative overflow-hidden">
 	<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full bg-primary-50/50 blur-[150px]" />
 
 	<div class="max-w-5xl mx-auto px-6 relative z-10">
@@ -202,7 +202,7 @@
 </section>
 
 <!-- Social proof -->
-<section class="bg-surface-50 py-20 border-t border-surface-100">
+<section class="bg-white py-20">
 	<div class="max-w-4xl mx-auto px-6">
 		<div class="scroll-animate-scale">
 			<div class="relative p-8 md:p-12 rounded-3xl bg-gradient-to-br from-primary-700 to-primary-900 overflow-hidden shadow-soft-xl">
@@ -227,7 +227,7 @@
 </section>
 
 <!-- Pricing -->
-<section id="pricing" class="bg-white py-28 border-t border-surface-100">
+<section id="pricing" class="bg-surface-100/50 py-28">
 	<div class="max-w-5xl mx-auto px-6">
 		<div class="text-center mb-16 scroll-animate">
 			<p class="text-sm font-semibold text-accent-600 uppercase tracking-widest mb-3">Precios</p>
@@ -265,7 +265,7 @@
 </section>
 
 <!-- CTA -->
-<section class="bg-surface-50 py-28 border-t border-surface-100 relative overflow-hidden">
+<section class="bg-white py-28 relative overflow-hidden">
 	<div class="absolute inset-0">
 		<div class="absolute top-0 left-1/3 w-[600px] h-[400px] rounded-full bg-primary-100/40 blur-[120px]" />
 		<div class="absolute bottom-0 right-1/3 w-[400px] h-[300px] rounded-full bg-accent-100/30 blur-[100px]" />
@@ -285,7 +285,7 @@
 </section>
 
 <!-- Footer -->
-<footer class="bg-white border-t border-surface-100 py-12">
+<footer class="bg-surface-100/50 border-t border-surface-200/60 py-12">
 	<div class="max-w-6xl mx-auto px-6">
 		<div class="flex flex-col md:flex-row items-center justify-between gap-6">
 			<div class="flex items-center gap-2">
