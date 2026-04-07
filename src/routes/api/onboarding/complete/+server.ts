@@ -6,28 +6,29 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ message: 'No autorizado' }, { status: 401 });
 	}
 
-	const { ranch } = await request.json();
+	const data = await request.json();
 
-	if (!ranch || !ranch.name || ranch.geofence_lat == null || ranch.geofence_lng == null) {
-		return json({ message: 'Datos del rancho incompletos.' }, { status: 400 });
-	}
-
-	const { data, error } = await locals.supabase
-		.from('ranches')
-		.insert({
-			tenant_id: locals.tenantId,
-			name: ranch.name,
-			address: ranch.address || null,
-			geofence_lat: ranch.geofence_lat,
-			geofence_lng: ranch.geofence_lng,
-			geofence_radius_meters: ranch.geofence_radius_meters || 500
+	// Store onboarding info in tenant settings
+	const { error } = await locals.supabase
+		.from('tenants')
+		.update({
+			settings: {
+				onboarding_completed: true,
+				industry: data.industry || null,
+				state: data.state || null,
+				city: data.city || null,
+				total_ranches_estimate: data.total_ranches || 0,
+				total_workers_estimate: data.total_workers || 0,
+				has_supervisors: data.has_supervisors ?? false,
+				main_problem: data.main_problem || null,
+				current_method: data.current_method || null
+			}
 		})
-		.select()
-		.single();
+		.eq('id', locals.tenantId);
 
 	if (error) {
 		return json({ message: error.message }, { status: 500 });
 	}
 
-	return json({ ranch: data });
+	return json({ message: 'Onboarding completado' });
 };
