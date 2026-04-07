@@ -90,8 +90,8 @@
 	/* Scroll-triggered animations */
 	.scroll-animate {
 		opacity: 0;
-		transform: translateY(30px);
-		transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+		transform: translateY(16px);
+		transition: opacity 0.35s ease-out, transform 0.35s ease-out;
 	}
 
 	.scroll-animate.visible {
@@ -101,8 +101,8 @@
 
 	.scroll-animate-left {
 		opacity: 0;
-		transform: translateX(-30px);
-		transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+		transform: translateX(-16px);
+		transition: opacity 0.35s ease-out, transform 0.35s ease-out;
 	}
 
 	.scroll-animate-left.visible {
@@ -112,8 +112,8 @@
 
 	.scroll-animate-scale {
 		opacity: 0;
-		transform: scale(0.92);
-		transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+		transform: scale(0.95);
+		transition: opacity 0.3s ease-out, transform 0.3s ease-out;
 	}
 
 	.scroll-animate-scale.visible {
@@ -140,14 +140,14 @@
 }
 
 @layer utilities {
-	.stagger-1 { animation-delay: 0.05s; animation-fill-mode: backwards; }
-	.stagger-2 { animation-delay: 0.1s; animation-fill-mode: backwards; }
-	.stagger-3 { animation-delay: 0.15s; animation-fill-mode: backwards; }
-	.stagger-4 { animation-delay: 0.2s; animation-fill-mode: backwards; }
-	.stagger-5 { animation-delay: 0.25s; animation-fill-mode: backwards; }
-	.stagger-6 { animation-delay: 0.3s; animation-fill-mode: backwards; }
-	.stagger-7 { animation-delay: 0.35s; animation-fill-mode: backwards; }
-	.stagger-8 { animation-delay: 0.4s; animation-fill-mode: backwards; }
+	.stagger-1 { animation-delay: 0.03s; animation-fill-mode: backwards; }
+	.stagger-2 { animation-delay: 0.06s; animation-fill-mode: backwards; }
+	.stagger-3 { animation-delay: 0.09s; animation-fill-mode: backwards; }
+	.stagger-4 { animation-delay: 0.12s; animation-fill-mode: backwards; }
+	.stagger-5 { animation-delay: 0.15s; animation-fill-mode: backwards; }
+	.stagger-6 { animation-delay: 0.18s; animation-fill-mode: backwards; }
+	.stagger-7 { animation-delay: 0.21s; animation-fill-mode: backwards; }
+	.stagger-8 { animation-delay: 0.24s; animation-fill-mode: backwards; }
 
 	.transition-default {
 		transition-property: color, background-color, border-color, box-shadow, opacity, transform;
