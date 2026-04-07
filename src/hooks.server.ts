@@ -4,6 +4,7 @@ import type { Database } from '$lib/types/database.types';
 
 const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.PUBLIC_SUPABASE_ANON_KEY;
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.session = null;
@@ -12,12 +13,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.assignedRanchId = null;
 	event.locals.userRole = null;
 
-	if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-		const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
-			auth: {
-				autoRefreshToken: false,
-				persistSession: false
-			}
+	if (SUPABASE_URL && SERVICE_ROLE_KEY) {
+		// Always use service role for server-side queries (bypasses RLS)
+		const supabase = createClient<Database>(SUPABASE_URL, SERVICE_ROLE_KEY, {
+			auth: { autoRefreshToken: false, persistSession: false }
 		});
 
 		event.locals.supabase = supabase;
@@ -25,22 +24,19 @@ export const handle: Handle = async ({ event, resolve }) => {
 		const accessToken = event.cookies.get('sb-access-token');
 		const refreshToken = event.cookies.get('sb-refresh-token');
 
-		if (accessToken && refreshToken) {
-			const {
-				data: { session }
-			} = await supabase.auth.setSession({
-				access_token: accessToken,
-				refresh_token: refreshToken
-			});
+		if (accessToken) {
+			// Resolve user from token
+			const { data: { user } } = await supabase.auth.getUser(accessToken);
 
-			if (session) {
-				event.locals.session = session;
+			if (user) {
+				// Set a minimal session object for compatibility
+				event.locals.session = { user, access_token: accessToken, refresh_token: refreshToken || '' } as any;
 
 				// Check if platform admin
 				const { data: admin } = await supabase
 					.from('admins')
 					.select('id, role')
-					.eq('id', session.user.id)
+					.eq('id', user.id)
 					.single();
 
 				if (admin) {
@@ -50,7 +46,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 					const { data: tenantUser } = await supabase
 						.from('tenant_users')
 						.select('id, tenant_id, role, assigned_ranch_id')
-						.eq('auth_user_id', session.user.id)
+						.eq('auth_user_id', user.id)
 						.single();
 
 					if (tenantUser) {
@@ -58,7 +54,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 						event.locals.tenantUserId = tenantUser.id;
 						event.locals.assignedRanchId = (tenantUser as any).assigned_ranch_id || null;
 
-						// Map DB 'admin' to 'tenant_admin' to avoid collision with platform admin
 						const mappedRole = tenantUser.role === 'admin' ? 'tenant_admin' : tenantUser.role;
 						event.locals.userRole = mappedRole as App.Locals['userRole'];
 					}
