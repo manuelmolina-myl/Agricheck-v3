@@ -12,15 +12,23 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 
 	// Check onboarding completion
 	if (locals.tenantId && locals.supabase) {
-		const { data: tenant } = await locals.supabase
-			.from('tenants')
-			.select('settings')
-			.eq('id', locals.tenantId)
-			.single();
+		try {
+			const { data: tenant } = await locals.supabase
+				.from('tenants')
+				.select('settings')
+				.eq('id', locals.tenantId)
+				.single();
 
-		const settings = tenant?.settings as Record<string, unknown> | null;
-		if (!settings || !settings.onboarding_completed) {
-			throw redirect(303, '/onboarding');
+			const settings = (tenant?.settings ?? null) as Record<string, unknown> | null;
+			if (!settings || !settings.onboarding_completed) {
+				throw redirect(303, '/onboarding');
+			}
+		} catch (e) {
+			// If it's a redirect, re-throw it
+			if (e && typeof e === 'object' && 'status' in e && (e as any).status === 303) {
+				throw e;
+			}
+			// Otherwise swallow — allow access if DB query fails
 		}
 	}
 
