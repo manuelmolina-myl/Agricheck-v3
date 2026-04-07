@@ -1,15 +1,14 @@
 import type { PageServerLoad } from './$types';
 import { createClient } from '@supabase/supabase-js';
+import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 
 export const load: PageServerLoad = async ({ params }) => {
-	const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
-	const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-	if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+	if (!publicEnv.PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
 		return { worker: null, error: 'Server not configured' };
 	}
 
-	const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+	const supabase = createClient(publicEnv.PUBLIC_SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!, {
 		auth: { autoRefreshToken: false, persistSession: false }
 	});
 

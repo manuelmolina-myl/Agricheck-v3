@@ -1,15 +1,18 @@
 import Stripe from 'stripe';
+import { env } from '$env/dynamic/private';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-	apiVersion: '2024-04-10' as Stripe.LatestApiVersion
-});
+function getStripe() {
+	return new Stripe(env.STRIPE_SECRET_KEY!, {
+		apiVersion: '2024-04-10' as Stripe.LatestApiVersion
+	});
+}
 
 export async function createCustomer(params: {
 	email: string;
 	name: string;
 	tenantId: string;
 }) {
-	return await stripe.customers.create({
+	return await getStripe().customers.create({
 		email: params.email,
 		name: params.name,
 		metadata: {
@@ -23,7 +26,7 @@ export async function createSubscription(params: {
 	priceId: string;
 	trialDays?: number;
 }) {
-	return await stripe.subscriptions.create({
+	return await getStripe().subscriptions.create({
 		customer: params.customerId,
 		items: [{ price: params.priceId }],
 		trial_period_days: params.trialDays,
@@ -35,8 +38,10 @@ export async function createSubscription(params: {
 	});
 }
 
-export const PRICE_IDS = {
-	starter: process.env.STRIPE_PRICE_STARTER!,
-	professional: process.env.STRIPE_PRICE_PROFESSIONAL!,
-	enterprise: process.env.STRIPE_PRICE_ENTERPRISE!
-};
+export function getPriceIds() {
+	return {
+		starter: env.STRIPE_PRICE_STARTER!,
+		professional: env.STRIPE_PRICE_PROFESSIONAL!,
+		enterprise: env.STRIPE_PRICE_ENTERPRISE!
+	};
+}

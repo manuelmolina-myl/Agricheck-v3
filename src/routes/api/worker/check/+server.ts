@@ -2,16 +2,15 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createClient } from '@supabase/supabase-js';
 import { isInsideGeofence } from '$lib/server/geofence';
-
-const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 
 export const POST: RequestHandler = async ({ request }) => {
-	if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+	if (!publicEnv.PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
 		return json({ message: 'Server not configured' }, { status: 503 });
 	}
 
-	const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+	const supabase = createClient(publicEnv.PUBLIC_SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, {
 		auth: { autoRefreshToken: false, persistSession: false }
 	});
 
@@ -69,9 +68,9 @@ export const POST: RequestHandler = async ({ request }) => {
 	let photoUrl = '';
 	if (photo && photo.size > 0) {
 		const path = `${worker.tenant_id}/checkins/${workerId}/${Date.now()}.jpg`;
-		const R2_ENDPOINT = process.env.PUBLIC_R2_ENDPOINT;
-		const R2_TOKEN = process.env.R2_AUTH_TOKEN;
-		const R2_PUBLIC = process.env.PUBLIC_R2_PUBLIC_URL;
+		const R2_ENDPOINT = publicEnv.PUBLIC_R2_ENDPOINT;
+		const R2_TOKEN = env.R2_AUTH_TOKEN;
+		const R2_PUBLIC = publicEnv.PUBLIC_R2_PUBLIC_URL;
 
 		if (R2_ENDPOINT && R2_TOKEN) {
 			try {
@@ -89,7 +88,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	let faceConfidence = 100; // Default to 100 if no face verification available
 	let faceVerified = true;
 
-	if (worker.face_encoding && photo && photo.size > 0 && process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+	if (worker.face_encoding && photo && photo.size > 0 && env.GOOGLE_APPLICATION_CREDENTIALS) {
 		try {
 			const { compareFaces } = await import('$lib/server/facial');
 			const buffer = Buffer.from(await photo.arrayBuffer());

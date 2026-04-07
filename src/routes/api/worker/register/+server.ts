@@ -1,16 +1,15 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createClient } from '@supabase/supabase-js';
-
-const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 
 export const POST: RequestHandler = async ({ request }) => {
-	if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+	if (!publicEnv.PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
 		return json({ message: 'Server not configured' }, { status: 503 });
 	}
 
-	const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+	const supabase = createClient(publicEnv.PUBLIC_SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!, {
 		auth: { autoRefreshToken: false, persistSession: false }
 	});
 
@@ -40,9 +39,9 @@ export const POST: RequestHandler = async ({ request }) => {
 	// 2. Upload photo to R2
 	let photoUrl = '';
 	const path = `${worker.tenant_id}/workers/${worker.id}/registration.jpg`;
-	const R2_ENDPOINT = process.env.PUBLIC_R2_ENDPOINT;
-	const R2_TOKEN = process.env.R2_AUTH_TOKEN;
-	const R2_PUBLIC = process.env.PUBLIC_R2_PUBLIC_URL;
+	const R2_ENDPOINT = publicEnv.PUBLIC_R2_ENDPOINT;
+	const R2_TOKEN = env.R2_AUTH_TOKEN;
+	const R2_PUBLIC = publicEnv.PUBLIC_R2_PUBLIC_URL;
 
 	if (R2_ENDPOINT && R2_TOKEN) {
 		try {
@@ -61,7 +60,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	// 3. Detect face and store encoding
 	let faceEncoding: string | null = null;
-	if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+	if (env.GOOGLE_APPLICATION_CREDENTIALS) {
 		try {
 			const { detectFace } = await import('$lib/server/facial');
 			const buffer = Buffer.from(await photo.arrayBuffer());

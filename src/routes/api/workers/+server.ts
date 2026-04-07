@@ -1,6 +1,8 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { canManageWorkers } from '$lib/permissions';
+import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 
 export const GET: RequestHandler = async ({ locals, url }) => {
 	if (!locals.session || !locals.tenantId) {
@@ -64,9 +66,9 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		const path = `${locals.tenantId}/workers/${Date.now()}-${phone.replace(/\D/g, '')}.jpg`;
 
 		try {
-			const R2_ENDPOINT = process.env.PUBLIC_R2_ENDPOINT;
-			const R2_TOKEN = process.env.R2_AUTH_TOKEN;
-			const R2_PUBLIC = process.env.PUBLIC_R2_PUBLIC_URL;
+			const R2_ENDPOINT = publicEnv.PUBLIC_R2_ENDPOINT;
+			const R2_TOKEN = env.R2_AUTH_TOKEN;
+			const R2_PUBLIC = publicEnv.PUBLIC_R2_PUBLIC_URL;
 
 			if (R2_ENDPOINT && R2_TOKEN) {
 				const response = await fetch(`${R2_ENDPOINT}/${path}`, {
@@ -93,7 +95,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 
 	// Detect face encoding if Google Vision is configured
 	let faceEncoding: string | null = null;
-	if (photo && photo.size > 0 && process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+	if (photo && photo.size > 0 && env.GOOGLE_APPLICATION_CREDENTIALS) {
 		try {
 			const { detectFace } = await import('$lib/server/facial');
 			const buffer = Buffer.from(await photo.arrayBuffer());

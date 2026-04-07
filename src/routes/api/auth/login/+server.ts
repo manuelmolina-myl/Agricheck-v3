@@ -1,16 +1,14 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createClient } from '@supabase/supabase-js';
-
-const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.PUBLIC_SUPABASE_ANON_KEY;
+import { env as publicEnv } from '$env/dynamic/public';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
-	if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+	if (!publicEnv.PUBLIC_SUPABASE_URL || !publicEnv.PUBLIC_SUPABASE_ANON_KEY) {
 		return json({ message: 'Server not configured. Set Supabase environment variables.' }, { status: 503 });
 	}
 
-	const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+	const supabase = createClient(publicEnv.PUBLIC_SUPABASE_URL!, publicEnv.PUBLIC_SUPABASE_ANON_KEY!);
 	const { email, password } = await request.json();
 
 	if (!email || !password) {

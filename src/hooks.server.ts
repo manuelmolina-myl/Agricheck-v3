@@ -1,10 +1,8 @@
 import { createClient } from '@supabase/supabase-js';
 import { redirect, type Handle } from '@sveltejs/kit';
 import type { Database } from '$lib/types/database.types';
-
-const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.PUBLIC_SUPABASE_ANON_KEY;
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 
 export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.session = null;
@@ -13,9 +11,15 @@ export const handle: Handle = async ({ event, resolve }) => {
 	event.locals.assignedRanchId = null;
 	event.locals.userRole = null;
 
-	if (SUPABASE_URL && SERVICE_ROLE_KEY) {
-		// Always use service role for server-side queries (bypasses RLS)
-		const supabase = createClient<Database>(SUPABASE_URL, SERVICE_ROLE_KEY, {
+	const SUPABASE_URL = publicEnv.PUBLIC_SUPABASE_URL;
+	const SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY;
+	const ANON_KEY = publicEnv.PUBLIC_SUPABASE_ANON_KEY;
+
+	// Use service role key if available, otherwise fall back to anon key
+	const dbKey = SERVICE_ROLE_KEY || ANON_KEY;
+
+	if (SUPABASE_URL && dbKey) {
+		const supabase = createClient<Database>(SUPABASE_URL, dbKey, {
 			auth: { autoRefreshToken: false, persistSession: false }
 		});
 
@@ -25,11 +29,9 @@ export const handle: Handle = async ({ event, resolve }) => {
 		const refreshToken = event.cookies.get('sb-refresh-token');
 
 		if (accessToken) {
-			// Resolve user from token
 			const { data: { user } } = await supabase.auth.getUser(accessToken);
 
 			if (user) {
-				// Set a minimal session object for compatibility
 				event.locals.session = { user, access_token: accessToken, refresh_token: refreshToken || '' } as any;
 
 				// Check if platform admin
@@ -42,7 +44,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 				if (admin) {
 					event.locals.userRole = 'admin';
 				} else {
-					// Check tenant user
 					const { data: tenantUser } = await supabase
 						.from('tenant_users')
 						.select('id, tenant_id, role, assigned_ranch_id')
@@ -64,19 +65,16 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	const { pathname } = event.url;
 
-	// Protect admin routes
 	if (pathname.startsWith('/admin')) {
 		if (!event.locals.session) throw redirect(303, '/login');
 		if (event.locals.userRole !== 'admin') throw redirect(303, '/dashboard');
 	}
 
-	// Protect supervisor check-in route
 	if (pathname.startsWith('/check-supervisor')) {
 		if (!event.locals.session) throw redirect(303, '/login');
 		if (event.locals.userRole !== 'encargado') throw redirect(303, '/dashboard');
 	}
 
-	// Protect app routes
 	if (
 		pathname.startsWith('/dashboard') ||
 		pathname.startsWith('/workers') ||
@@ -87,12 +85,10 @@ export const handle: Handle = async ({ event, resolve }) => {
 		if (!event.locals.session) throw redirect(303, '/login');
 	}
 
-	// Protect billing settings (owner only)
 	if (pathname.startsWith('/settings/billing')) {
 		if (event.locals.userRole !== 'owner') throw redirect(303, '/dashboard');
 	}
 
-	// Protect team settings (owner + tenant_admin)
 	if (pathname.startsWith('/settings/team')) {
 		if (event.locals.userRole !== 'owner' && event.locals.userRole !== 'tenant_admin') {
 			throw redirect(303, '/dashboard');

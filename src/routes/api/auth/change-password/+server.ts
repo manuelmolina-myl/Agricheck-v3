@@ -1,16 +1,15 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createClient } from '@supabase/supabase-js';
+import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.session) {
 		return json({ message: 'No autorizado' }, { status: 401 });
 	}
 
-	const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
-	const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-	if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+	if (!publicEnv.PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) {
 		return json({ message: 'Server not configured' }, { status: 503 });
 	}
 
@@ -20,7 +19,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ message: 'La contrasena debe tener al menos 8 caracteres.' }, { status: 400 });
 	}
 
-	const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+	const supabase = createClient(publicEnv.PUBLIC_SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!, {
 		auth: { autoRefreshToken: false, persistSession: false }
 	});
 

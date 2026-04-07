@@ -2,9 +2,8 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { createClient } from '@supabase/supabase-js';
 import { canManageTeam, canAssignRole } from '$lib/permissions';
-
-const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
-const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+import { env } from '$env/dynamic/private';
+import { env as publicEnv } from '$env/dynamic/public';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	if (!locals.session || !locals.tenantId) return json({ message: 'No autorizado' }, { status: 401 });
@@ -23,7 +22,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.session || !locals.tenantId) return json({ message: 'No autorizado' }, { status: 401 });
 	if (!canManageTeam(locals.userRole)) return json({ message: 'Sin permisos' }, { status: 403 });
 
-	if (!SUPABASE_URL || !SERVICE_ROLE_KEY) return json({ message: 'Server not configured' }, { status: 503 });
+	if (!publicEnv.PUBLIC_SUPABASE_URL || !env.SUPABASE_SERVICE_ROLE_KEY) return json({ message: 'Server not configured' }, { status: 503 });
 
 	const { email, full_name, role, assigned_ranch_id } = await request.json();
 
@@ -38,7 +37,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 		return json({ message: 'No puedes asignar este rol.' }, { status: 403 });
 	}
 
-	const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+	const supabaseAdmin = createClient(publicEnv.PUBLIC_SUPABASE_URL!, env.SUPABASE_SERVICE_ROLE_KEY!, {
 		auth: { autoRefreshToken: false, persistSession: false }
 	});
 

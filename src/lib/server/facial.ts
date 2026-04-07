@@ -1,11 +1,14 @@
 import vision from '@google-cloud/vision';
+import { env } from '$env/dynamic/private';
 
-const client = new vision.ImageAnnotatorClient({
-	keyFilename: process.env.GOOGLE_APPLICATION_CREDENTIALS
-});
+function getClient() {
+	return new vision.ImageAnnotatorClient({
+		keyFilename: env.GOOGLE_APPLICATION_CREDENTIALS
+	});
+}
 
 export async function detectFace(imageBuffer: Buffer) {
-	const [result] = await client.faceDetection({
+	const [result] = await getClient().faceDetection({
 		image: { content: imageBuffer }
 	});
 
