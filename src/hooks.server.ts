@@ -14,8 +14,6 @@ export const handle: Handle = async ({ event, resolve }) => {
 	const SUPABASE_URL = publicEnv.PUBLIC_SUPABASE_URL;
 	const SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY;
 	const ANON_KEY = publicEnv.PUBLIC_SUPABASE_ANON_KEY;
-
-	// Use service role key if available, otherwise fall back to anon key
 	const dbKey = SERVICE_ROLE_KEY || ANON_KEY;
 
 	if (SUPABASE_URL && dbKey) {
@@ -25,41 +23,55 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 		event.locals.supabase = supabase;
 
-		const accessToken = event.cookies.get('sb-access-token');
-		const refreshToken = event.cookies.get('sb-refresh-token');
+		try {
+			const accessToken = event.cookies.get('sb-access-token');
+			const refreshToken = event.cookies.get('sb-refresh-token');
 
-		if (accessToken) {
-			const { data: { user } } = await supabase.auth.getUser(accessToken);
+			if (accessToken) {
+				const {
+					data: { user }
+				} = await supabase.auth.getUser(accessToken);
 
-			if (user) {
-				event.locals.session = { user, access_token: accessToken, refresh_token: refreshToken || '' } as any;
+				if (user) {
+					event.locals.session = {
+						user,
+						access_token: accessToken,
+						refresh_token: refreshToken || ''
+					} as any;
 
-				// Check if platform admin
-				const { data: admin } = await supabase
-					.from('admins')
-					.select('id, role')
-					.eq('id', user.id)
-					.single();
-
-				if (admin) {
-					event.locals.userRole = 'admin';
-				} else {
-					const { data: tenantUser } = await supabase
-						.from('tenant_users')
-						.select('id, tenant_id, role, assigned_ranch_id')
-						.eq('auth_user_id', user.id)
+					// Check if platform admin
+					const { data: admin } = await supabase
+						.from('admins')
+						.select('id, role')
+						.eq('id', user.id)
 						.single();
 
-					if (tenantUser) {
-						event.locals.tenantId = tenantUser.tenant_id;
-						event.locals.tenantUserId = tenantUser.id;
-						event.locals.assignedRanchId = (tenantUser as any).assigned_ranch_id || null;
+					if (admin) {
+						event.locals.userRole = 'admin';
+					} else {
+						// Query tenant_users — use * to be resilient to missing columns
+						const { data: tenantUser } = await supabase
+							.from('tenant_users')
+							.select('*')
+							.eq('auth_user_id', user.id)
+							.single();
 
-						const mappedRole = tenantUser.role === 'admin' ? 'tenant_admin' : tenantUser.role;
-						event.locals.userRole = mappedRole as App.Locals['userRole'];
+						if (tenantUser) {
+							event.locals.tenantId = tenantUser.tenant_id;
+							event.locals.tenantUserId = tenantUser.id;
+							event.locals.assignedRanchId =
+								(tenantUser as any).assigned_ranch_id || null;
+
+							const mappedRole =
+								tenantUser.role === 'admin' ? 'tenant_admin' : tenantUser.role;
+							event.locals.userRole = mappedRole as App.Locals['userRole'];
+						}
 					}
 				}
 			}
+		} catch {
+			// Auth resolution failed — continue without session
+			// locals.supabase is still available for page loads
 		}
 	}
 
