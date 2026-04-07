@@ -1,6 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Button from '$lib/components/Button.svelte';
+	import Logo from '$lib/components/Logo.svelte';
+	import Alert from '$lib/components/Alert.svelte';
+
+	export let data;
+	$: workerData = data.worker;
+	$: serverError = data.error;
 
 	let video: HTMLVideoElement;
 	let canvas: HTMLCanvasElement;
@@ -10,6 +16,9 @@
 	let error = '';
 
 	$: token = $page.params.token;
+	$: if (workerData?.id) {
+		localStorage.setItem('agricheck_worker_id', workerData.id);
+	}
 
 	async function startCamera() {
 		try {
