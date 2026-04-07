@@ -6,6 +6,10 @@ export const load: PageServerLoad = async ({ locals }) => {
 		throw redirect(303, '/admin');
 	}
 
+	if (locals.userRole === 'encargado') {
+		throw redirect(303, '/check-supervisor');
+	}
+
 	if (locals.session) {
 		throw redirect(303, '/dashboard');
 	}

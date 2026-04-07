@@ -22,6 +22,8 @@ export const POST: RequestHandler = async ({ request }) => {
 	const mode = formData.get('mode') as string; // 'entry' or 'exit'
 	const workerId = formData.get('workerId') as string;
 	const timestamp = formData.get('timestamp') as string | null;
+	const supervisorId = formData.get('supervisorId') as string | null;
+	const supervisorName = formData.get('supervisorName') as string | null;
 
 	if (!workerId || !mode || isNaN(lat) || isNaN(lng)) {
 		return json({ message: 'Datos incompletos' }, { status: 400 });
@@ -131,7 +133,9 @@ export const POST: RequestHandler = async ({ request }) => {
 				entry_location_lng: lng,
 				entry_distance_meters: distanceMeters,
 				entry_face_confidence: faceConfidence,
-				entry_verified: faceVerified
+				entry_verified: faceVerified,
+				checked_in_by: supervisorId || null,
+				checked_in_by_name: supervisorName || null
 			});
 
 		if (insertError) {

@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { canManageWorkers } from '$lib/permissions';
 
 export const GET: RequestHandler = async ({ locals, url }) => {
 	if (!locals.session || !locals.tenantId) {
@@ -40,6 +41,9 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 export const POST: RequestHandler = async ({ request, locals }) => {
 	if (!locals.session || !locals.tenantId) {
 		return json({ message: 'No autorizado' }, { status: 401 });
+	}
+	if (!canManageWorkers(locals.userRole)) {
+		return json({ message: 'Sin permisos para gestionar trabajadores.' }, { status: 403 });
 	}
 
 	const formData = await request.formData();

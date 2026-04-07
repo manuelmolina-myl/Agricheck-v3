@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { canManageRanches } from '$lib/permissions';
 
 export const GET: RequestHandler = async ({ locals }) => {
 	if (!locals.session || !locals.tenantId) {
@@ -20,9 +21,8 @@ export const GET: RequestHandler = async ({ locals }) => {
 };
 
 export const POST: RequestHandler = async ({ request, locals }) => {
-	if (!locals.session || !locals.tenantId) {
-		return json({ message: 'No autorizado' }, { status: 401 });
-	}
+	if (!locals.session || !locals.tenantId) return json({ message: 'No autorizado' }, { status: 401 });
+	if (!canManageRanches(locals.userRole)) return json({ message: 'Sin permisos' }, { status: 403 });
 
 	const body = await request.json();
 	const { name, lot_number, address, geofence_lat, geofence_lng, geofence_radius_meters, supervisor_name, supervisor_phone } = body;

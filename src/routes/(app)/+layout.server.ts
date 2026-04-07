@@ -12,6 +12,9 @@ export const load: LayoutServerLoad = async ({ locals }) => {
 
 	return {
 		session: locals.session,
-		tenantId: locals.tenantId
+		tenantId: locals.tenantId,
+		userRole: locals.userRole,
+		tenantUserId: locals.tenantUserId,
+		assignedRanchId: locals.assignedRanchId
 	};
 };

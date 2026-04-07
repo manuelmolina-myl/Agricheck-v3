@@ -8,7 +8,9 @@ declare global {
 			getSession(): Promise<Session | null>;
 			session: Session | null;
 			tenantId: string | null;
-			userRole: 'admin' | 'owner' | 'manager' | 'viewer' | 'worker' | null;
+			tenantUserId: string | null;
+			assignedRanchId: string | null;
+			userRole: 'admin' | 'owner' | 'tenant_admin' | 'rh' | 'encargado' | 'viewer' | 'worker' | null;
 		}
 		interface PageData {
 			session: Session | null;

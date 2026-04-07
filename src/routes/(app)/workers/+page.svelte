@@ -1,13 +1,17 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import Button from '$lib/components/Button.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import Input from '$lib/components/Input.svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
+	import { canManageWorkers } from '$lib/permissions';
 
 	export let data;
 	$: allWorkers = data.workers || [];
+	$: userRole = $page.data.userRole;
+	$: canManage = canManageWorkers(userRole);
 	let search = '';
 
 	$: workers = search
@@ -39,10 +43,12 @@
 		<h1 class="text-display-sm font-bold text-surface-900">Trabajadores</h1>
 		<p class="text-surface-500 mt-1">{allWorkers.length} registrado{allWorkers.length !== 1 ? 's' : ''}</p>
 	</div>
-	<Button href="/workers/create">
-		<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-		Agregar
-	</Button>
+	{#if canManage}
+		<Button href="/workers/create">
+			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+			Agregar
+		</Button>
+	{/if}
 </div>
 
 {#if allWorkers.length === 0}

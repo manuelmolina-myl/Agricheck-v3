@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { canManageWorkers } from '$lib/permissions';
 
 export const GET: RequestHandler = async ({ params, locals, url }) => {
 	if (!locals.session || !locals.tenantId) {
@@ -33,6 +34,9 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 	if (!locals.session || !locals.tenantId) {
 		return json({ message: 'No autorizado' }, { status: 401 });
 	}
+	if (!canManageWorkers(locals.userRole)) {
+		return json({ message: 'Sin permisos' }, { status: 403 });
+	}
 
 	const body = await request.json();
 
@@ -61,6 +65,9 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 export const DELETE: RequestHandler = async ({ params, locals }) => {
 	if (!locals.session || !locals.tenantId) {
 		return json({ message: 'No autorizado' }, { status: 401 });
+	}
+	if (!canManageWorkers(locals.userRole)) {
+		return json({ message: 'Sin permisos' }, { status: 403 });
 	}
 
 	const { error } = await locals.supabase

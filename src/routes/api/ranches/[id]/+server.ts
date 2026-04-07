@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { canManageRanches } from '$lib/permissions';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	if (!locals.session || !locals.tenantId) {
@@ -21,9 +22,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 };
 
 export const PATCH: RequestHandler = async ({ params, request, locals }) => {
-	if (!locals.session || !locals.tenantId) {
-		return json({ message: 'No autorizado' }, { status: 401 });
-	}
+	if (!locals.session || !locals.tenantId) return json({ message: 'No autorizado' }, { status: 401 });
+	if (!canManageRanches(locals.userRole)) return json({ message: 'Sin permisos' }, { status: 403 });
 
 	const body = await request.json();
 
@@ -43,9 +43,8 @@ export const PATCH: RequestHandler = async ({ params, request, locals }) => {
 };
 
 export const DELETE: RequestHandler = async ({ params, locals }) => {
-	if (!locals.session || !locals.tenantId) {
-		return json({ message: 'No autorizado' }, { status: 401 });
-	}
+	if (!locals.session || !locals.tenantId) return json({ message: 'No autorizado' }, { status: 401 });
+	if (!canManageRanches(locals.userRole)) return json({ message: 'Sin permisos' }, { status: 403 });
 
 	const { error } = await locals.supabase
 		.from('ranches')

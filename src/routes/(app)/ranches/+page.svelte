@@ -1,11 +1,15 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import Button from '$lib/components/Button.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import EmptyState from '$lib/components/EmptyState.svelte';
+	import { canManageRanches } from '$lib/permissions';
 
 	export let data;
 	$: ranches = data.ranches || [];
+	$: userRole = $page.data.userRole;
+	$: canManage = canManageRanches(userRole);
 
 	async function deleteRanch(id: string) {
 		if (!confirm('Desactivar este rancho?')) return;
@@ -21,10 +25,12 @@
 		<h1 class="text-display-sm font-bold text-surface-900">Ranchos</h1>
 		<p class="text-surface-500 mt-1">Administra tus ubicaciones y geofences.</p>
 	</div>
-	<Button href="/ranches/create">
-		<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-		Agregar Rancho
-	</Button>
+	{#if canManage}
+		<Button href="/ranches/create">
+			<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+			Agregar Rancho
+		</Button>
+	{/if}
 </div>
 
 {#if ranches.length === 0}
@@ -70,10 +76,12 @@
 					{/if}
 				</div>
 
-				<div class="flex items-center gap-2 pt-3 border-t border-surface-100">
-					<Button variant="ghost" size="xs" href="/ranches/create?edit={ranch.id}">Editar</Button>
-					<Button variant="ghost" size="xs" on:click={() => deleteRanch(ranch.id)}>Desactivar</Button>
-				</div>
+				{#if canManage}
+					<div class="flex items-center gap-2 pt-3 border-t border-surface-100">
+						<Button variant="ghost" size="xs" href="/ranches/create?edit={ranch.id}">Editar</Button>
+						<Button variant="ghost" size="xs" on:click={() => deleteRanch(ranch.id)}>Desactivar</Button>
+					</div>
+				{/if}
 			</Card>
 		{/each}
 	</div>
