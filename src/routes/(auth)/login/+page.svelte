@@ -45,7 +45,7 @@
 
 <div class="min-h-screen flex">
 	<!-- Left panel - brand -->
-	<div class="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-primary-700 via-primary-600 to-accent-600 relative overflow-hidden">
+	<div class="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-primary-900 via-primary-800 to-earth-800 relative overflow-hidden">
 		<div class="absolute inset-0 bg-dot-pattern" />
 
 		<!-- Floating decorative cards -->
