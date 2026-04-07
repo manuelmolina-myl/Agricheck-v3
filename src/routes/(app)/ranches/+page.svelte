@@ -46,22 +46,38 @@
 {:else}
 	<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
 		{#each ranches as ranch (ranch.id)}
-			<Card hover>
-				<div class="flex items-start justify-between mb-3">
-					<div>
-						<h3 class="font-semibold text-surface-900">{ranch.name}</h3>
-						{#if ranch.lot_number}
-							<p class="text-xs text-surface-400">Lote: {ranch.lot_number}</p>
-						{/if}
-					</div>
-					<Badge variant={ranch.active ? 'success' : 'neutral'} dot>
-						{ranch.active ? 'Activo' : 'Inactivo'}
-					</Badge>
+			<Card hover padding={false}>
+				<!-- Mini map thumbnail -->
+				<div class="relative h-36 overflow-hidden rounded-t-2xl bg-surface-100">
+					<iframe
+						title="Mapa {ranch.name}"
+						class="w-full h-[200%] scale-50 origin-top-left pointer-events-none"
+						style="width:200%;margin-left:-50%"
+						src="https://www.openstreetmap.org/export/embed.html?bbox={parseFloat(ranch.geofence_lng) - 0.01},{parseFloat(ranch.geofence_lat) - 0.006},{parseFloat(ranch.geofence_lng) + 0.01},{parseFloat(ranch.geofence_lat) + 0.006}&layer=mapnik&marker={ranch.geofence_lat},{ranch.geofence_lng}"
+						loading="lazy"
+					></iframe>
+					<!-- Green tint overlay -->
+					<div class="absolute inset-0 bg-primary-900/5 pointer-events-none" />
+					<!-- Bottom fade -->
+					<div class="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none" />
 				</div>
 
-				{#if ranch.address}
-					<p class="text-sm text-surface-500 mb-3">{ranch.address}</p>
-				{/if}
+				<div class="p-5">
+					<div class="flex items-start justify-between mb-2">
+						<div>
+							<h3 class="font-semibold text-surface-900">{ranch.name}</h3>
+							{#if ranch.lot_number}
+								<p class="text-xs text-surface-400">Lote: {ranch.lot_number}</p>
+							{/if}
+						</div>
+						<Badge variant={ranch.active ? 'success' : 'neutral'} dot>
+							{ranch.active ? 'Activo' : 'Inactivo'}
+						</Badge>
+					</div>
+
+					{#if ranch.address}
+						<p class="text-sm text-surface-500 mb-3">{ranch.address}</p>
+					{/if}
 
 				<div class="flex items-center gap-4 text-xs text-surface-400 mb-4">
 					<span class="flex items-center gap-1">
@@ -76,12 +92,13 @@
 					{/if}
 				</div>
 
-				{#if canManage}
-					<div class="flex items-center gap-2 pt-3 border-t border-surface-100">
-						<Button variant="ghost" size="xs" href="/ranches/create?edit={ranch.id}">Editar</Button>
-						<Button variant="ghost" size="xs" on:click={() => deleteRanch(ranch.id)}>Desactivar</Button>
-					</div>
-				{/if}
+					{#if canManage}
+						<div class="flex items-center gap-2 pt-3 border-t border-surface-100">
+							<Button variant="ghost" size="xs" href="/ranches/create?edit={ranch.id}">Editar</Button>
+							<Button variant="ghost" size="xs" on:click={() => deleteRanch(ranch.id)}>Desactivar</Button>
+						</div>
+					{/if}
+				</div>
 			</Card>
 		{/each}
 	</div>
