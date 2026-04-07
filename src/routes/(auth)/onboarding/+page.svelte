@@ -4,8 +4,11 @@
 	import Logo from '$lib/components/Logo.svelte';
 	import Badge from '$lib/components/Badge.svelte';
 
+	import Alert from '$lib/components/Alert.svelte';
+
 	let step = 1;
 	let loading = false;
+	let error = '';
 
 	// Step 1 — Company info
 	let industry = 'agricultura';
@@ -45,6 +48,7 @@
 
 	async function handleComplete() {
 		loading = true;
+		error = '';
 		try {
 			const response = await fetch('/api/onboarding/complete', {
 				method: 'POST',
@@ -60,7 +64,14 @@
 					current_method: currentMethod
 				})
 			});
-			if (response.ok) window.location.href = '/dashboard';
+			const result = await response.json();
+			if (!response.ok) {
+				error = result.message || 'Error al guardar.';
+				return;
+			}
+			window.location.href = '/dashboard';
+		} catch {
+			error = 'Error de conexion.';
 		} finally {
 			loading = false;
 		}
@@ -85,6 +96,10 @@
 				<div class="flex-1 h-1.5 rounded-full transition-all duration-500 {step >= s ? 'bg-primary-600' : 'bg-surface-200'}" />
 			{/each}
 		</div>
+
+		{#if error}
+			<div class="mb-6"><Alert variant="danger" dismissible>{error}</Alert></div>
+		{/if}
 
 		<div class="bg-white rounded-3xl shadow-soft-lg border border-surface-100/60 p-8 animate-fade-in">
 			{#if step === 1}

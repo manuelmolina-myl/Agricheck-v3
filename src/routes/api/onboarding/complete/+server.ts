@@ -1,15 +1,53 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { createClient } from '@supabase/supabase-js';
 
-export const POST: RequestHandler = async ({ request, locals }) => {
-	if (!locals.session || !locals.tenantId) {
-		return json({ message: 'No autorizado' }, { status: 401 });
+const SUPABASE_URL = process.env.PUBLIC_SUPABASE_URL;
+const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+export const POST: RequestHandler = async ({ request, locals, cookies }) => {
+	if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
+		return json({ message: 'Server not configured' }, { status: 503 });
+	}
+
+	const supabaseAdmin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+		auth: { autoRefreshToken: false, persistSession: false }
+	});
+
+	// Try locals first, fall back to resolving from cookie
+	let tenantId = locals.tenantId;
+
+	if (!tenantId) {
+		const accessToken = cookies.get('sb-access-token');
+		const refreshToken = cookies.get('sb-refresh-token');
+
+		if (!accessToken || !refreshToken) {
+			return json({ message: 'No autorizado' }, { status: 401 });
+		}
+
+		// Resolve session with service role
+		const { data: { user } } = await supabaseAdmin.auth.getUser(accessToken);
+		if (!user) {
+			return json({ message: 'Sesion invalida' }, { status: 401 });
+		}
+
+		// Find tenant for this user
+		const { data: tenantUser } = await supabaseAdmin
+			.from('tenant_users')
+			.select('tenant_id')
+			.eq('auth_user_id', user.id)
+			.single();
+
+		if (!tenantUser) {
+			return json({ message: 'Usuario sin empresa asignada' }, { status: 400 });
+		}
+
+		tenantId = tenantUser.tenant_id;
 	}
 
 	const data = await request.json();
 
-	// Store onboarding info in tenant settings
-	const { error } = await locals.supabase
+	const { error } = await supabaseAdmin
 		.from('tenants')
 		.update({
 			settings: {
@@ -24,7 +62,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				current_method: data.current_method || null
 			}
 		})
-		.eq('id', locals.tenantId);
+		.eq('id', tenantId);
 
 	if (error) {
 		return json({ message: error.message }, { status: 500 });
